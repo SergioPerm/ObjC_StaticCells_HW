@@ -9,7 +9,7 @@
 #import "SettingsTableViewController.h"
 
 typedef enum {
-    regFormLastName         = 0,
+    regFormLastName         = 7,
     regFormFirstName        = 1,
     regFormLogin            = 2,
     regFormPass             = 3,
@@ -53,7 +53,17 @@ const NSString *SettingsAddressKey = @"address";
     }
     
     [firstTextField becomeFirstResponder];
+    
+    [self setKeysForSettingsToTextFieldstypesDictionary];
+      
+}
 
+- (void)viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
+    
+    [self loadSettings];
+    
 }
 
 #pragma mark - Notifications
@@ -110,16 +120,53 @@ const NSString *SettingsAddressKey = @"address";
     
 }
 
-- (void) saveSettings:(UIControl*) controlElement {
+- (void) saveSettings {
+        
+    NSUserDefaults* userSettings = [NSUserDefaults standardUserDefaults];
+
+    for (id key in self.keysSettingsDictionary) {
+                
+        NSInteger currentTag = [key integerValue];
+        
+        for (UITextField* currentTextField in self.textFieldsCollection) {
+            
+            if (currentTextField.tag == currentTag) {
+             
+                [userSettings setObject:currentTextField.text forKey:key];
+                break;
+                
+            }
+        }
+            
+    }
     
-//    NSInteger ctrltag = controlElement.tag;
-//
-//    NSUserDefaults* userSettings = [NSUserDefaults standardUserDefaults];
-//
 //    NSString* settingsKey = [self.keysSettingsDictionary objectForKey:[@(ctrltag) stringValue]];
 //
 //    [userSettings setObject:<#(nullable id)#> forKey:<#(nonnull NSString *)#>]
     
+}
+
+- (void) loadSettings {
+    
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    for (id key in self.keysSettingsDictionary) {
+    
+        NSString* loadText = [NSString stringWithFormat:@"%@", [userDefaults objectForKey:key]];
+        
+        NSInteger currentTag = [key integerValue];
+       
+        for (UITextField* currentTextField in self.textFieldsCollection) {
+            
+            if (currentTextField.tag == currentTag) {
+                
+                currentTextField.text = loadText;
+                break;
+                
+            }
+        }
+        
+    }
 }
 
 #pragma mark - Methods
@@ -219,6 +266,8 @@ const NSString *SettingsAddressKey = @"address";
 }
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
+    
+    [self saveSettings];
     
     if (textField.tag == regFormEmail) {
         
